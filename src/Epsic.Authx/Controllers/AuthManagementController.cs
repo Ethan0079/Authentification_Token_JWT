@@ -15,10 +15,10 @@ namespace Epsic.Authx.Controllers
 {
     public class AuthManagementController : ControllerBase
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly JwtConfig _jwtConfig;
 
-        public AuthManagementController(UserManager<IdentityUser> userManager, IOptionsMonitor<JwtConfig> optionsMonitor)
+        public AuthManagementController(UserManager<ApplicationUser> userManager, IOptionsMonitor<JwtConfig> optionsMonitor)
         {
             _userManager = userManager;
             _jwtConfig = optionsMonitor.CurrentValue;
@@ -28,7 +28,11 @@ namespace Epsic.Authx.Controllers
         [Route("auth/Register")]
         public async Task<IActionResult> Register([FromBody] RegistrationRequest user)
         {
-            var newUser = new IdentityUser { Email = user.Email, UserName = user.Email };
+            var newUser = new ApplicationUser { 
+                Email = user.Email, 
+                UserName = user.Email,
+                isMedecin = user.isMedecin
+            };
             var isCreated = await _userManager.CreateAsync(newUser, user.Password);
             if (isCreated.Succeeded)
             {
@@ -48,7 +52,7 @@ namespace Epsic.Authx.Controllers
             });
         }
 
-        private string GenerateJwtToken(IdentityUser user)
+        private string GenerateJwtToken(ApplicationUser user)
         {
             var jwtTokenHandler = new JwtSecurityTokenHandler();
 
@@ -66,6 +70,7 @@ namespace Epsic.Authx.Controllers
                     new Claim("Id", user.Id),
                     new Claim(JwtRegisteredClaimNames.Sub, user.Email),
                     new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                    new Claim("isMedecin", user.isMedecin.ToString()),
                 }),
                 Expires = DateTime.UtcNow.AddHours(6),
                 // ici, nous ajoutons l'information sur l'algorithme de cryptage qui sera utilisé pour décrypter notre token.

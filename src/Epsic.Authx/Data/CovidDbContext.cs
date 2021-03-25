@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Epsic.Authx.Data
 {
-    public class CovidDbContext : IdentityDbContext
+    public class CovidDbContext : IdentityDbContext<ApplicationUser>
     {
         public DbSet<TestCovid> TestsCovid { get; set; }
 

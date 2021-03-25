@@ -67,10 +67,17 @@ namespace Epsic.Authx.Controllers
         [Authorize]
         public async Task<IActionResult> Create([Bind("DateTest,Resultat,TypeDeTest")] TestCovid testCovid)
         {
-            testCovid.Id = Guid.NewGuid();
-            _context.Add(testCovid);
-            await _context.SaveChangesAsync();
-            return Created($"TestsCovid/{testCovid.Id}", testCovid);
+            var user = _context.Users.Single(x => x.Id == User.FindFirst("Id").Value);
+
+            if (user.isMedecin)
+            {
+                testCovid.Id = Guid.NewGuid();
+                _context.Add(testCovid);
+                await _context.SaveChangesAsync();
+                return Created($"TestsCovid/{testCovid.Id}", testCovid);
+            }
+
+            return Unauthorized();
         }
     }
 }
